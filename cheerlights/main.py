@@ -8,11 +8,18 @@ sta_if.active(True)
 sta_if.connect('ENTER_YOUR_SSID','ENTER_YOUR_WIFI_PASSWORD')
 time.sleep(3)
 
-#neopixel connected on pin 14
 np = neopixel.NeoPixel(machine.Pin(14), 1)
 
 def setNeoPixel(color):
-   npColor = hex_to_rgb(color)
+   #hardcoding values for now because of LED trickery/Gamma Correction. More info here: https://learn.adafruit.com/led-tricks-gamma-correction/the-issue
+   #need to add gamma correction support
+   if color == '#FFC0CB': #pink
+      npColor = (255, 48, 48)
+   elif color == '#FFA500': #orange
+      npColor = (255, 36, 0)
+   else :
+      npColor = hex_to_rgb(color)
+   
    np[0] = npColor
    np.write()
 
@@ -48,4 +55,4 @@ if __name__ == "__main__":
    while True:
       color = getCheerlightsValue()
       setNeoPixel(color)
-      time.sleep(60)
+      time.sleep(30)
