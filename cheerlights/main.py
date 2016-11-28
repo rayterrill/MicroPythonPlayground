@@ -5,19 +5,21 @@ import ure
 #turn on wifi
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
-sta_if.connect('SSIS','PASSWORD')
+sta_if.connect('ENTER_YOUR_SSID','ENTER_YOUR_WIFI_PASSWORD')
 time.sleep(3)
 
+#neopixel connected on pin 14
 np = neopixel.NeoPixel(machine.Pin(14), 1)
 
 def setNeoPixel(color):
    npColor = hex_to_rgb(color)
    np[0] = npColor
    np.write()
-   time.sleep(3)
+
+def resetNeoPixel():
    np[0] = (0, 0, 0)
    np.write()
-
+   
 def getCheerlightsValue():
    url = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
    _, _, host, path = url.split('/', 3)
@@ -35,7 +37,6 @@ def getCheerlightsValue():
    color = m.group(1)
    return color
 
-#taken from  http://stackoverflow.com/questions/214359/converting-hex-color-to-rgb-and-vice-versa
 def hex_to_rgb(value):
     """Return (red, green, blue) for the color given as #rrggbb."""
     value = value.lstrip('#')
@@ -43,6 +44,8 @@ def hex_to_rgb(value):
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 if __name__ == "__main__":
-   color = getCheerlightsValue()
-   setNeoPixel(color)
-   #setNeoPixel()
+   resetNeoPixel()
+   while True:
+      color = getCheerlightsValue()
+      setNeoPixel(color)
+      time.sleep(60)
