@@ -11,17 +11,30 @@ time.sleep(3)
 np = neopixel.NeoPixel(machine.Pin(14), 1)
 
 def setNeoPixel(color):
-   #hardcoding values for now because of LED trickery/Gamma Correction. More info here: https://learn.adafruit.com/led-tricks-gamma-correction/the-issue
-   #need to add gamma correction support
-   if color == '#FFC0CB': #pink
-      npColor = (255, 48, 48)
-   elif color == '#FFA500': #orange
-      npColor = (255, 36, 0)
-   else :
-      npColor = hex_to_rgb(color)
+   npColor = hex_to_rgb(color)
+   #convert values to gamma values
+   #more info here info here: https://learn.adafruit.com/led-tricks-gamma-correction/the-issue
+   gammaValues = setGammaValues(npColor)
    
-   np[0] = npColor
+   np[0] = gammaValues
    np.write()
+
+def setGammaValues(npColor):
+   r, g, b = npColor
+
+   r = gammaEncode(r)
+   g = gammaEncode(g)
+   b = gammaEncode(b)
+   
+   gammaValues = (r, g, b)
+   return gammaValues
+
+def gammaEncode(value):
+   gamma = 2.8
+
+   #http://stackoverflow.com/questions/16521003/gamma-correction-formula-gamma-or-1-gamma
+   gammaVal = ((value / 255) ^ gamma) * 255
+   return gammaVal
 
 def resetNeoPixel():
    np[0] = (0, 0, 0)
