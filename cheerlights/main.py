@@ -1,6 +1,7 @@
 import machine, neopixel, time
 import network, socket
 import ure
+import urequests
 
 #turn on wifi
 sta_if = network.WLAN(network.STA_IF)
@@ -30,11 +31,11 @@ def setGammaValues(npColor):
    return gammaValues
 
 def gammaEncode(value):
-   gamma = 2.8
+   gamma = 6
 
    #http://stackoverflow.com/questions/16521003/gamma-correction-formula-gamma-or-1-gamma
-   gammaVal = ((value / 255) ^ gamma) * 255
-   return gammaVal
+   gammaVal = ((float(value) / 255) ** gamma) * 255
+   return round(gammaVal)
 
 def resetNeoPixel():
    np[0] = (0, 0, 0)
@@ -42,20 +43,10 @@ def resetNeoPixel():
    
 def getCheerlightsValue():
    url = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
-   _, _, host, path = url.split('/', 3)
-   addr = socket.getaddrinfo(host, 80)[0][-1]
-   s = socket.socket()
-   s.connect(addr)
-   s.send(bytes('GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n' % (path, host), 'utf8'))
-   #this part is super crude - not sure why i have to sleep but it seems like the data isn't ready yet
-   time.sleep(1)
-   data = s.recv(800)
-   time.sleep(5)
-   data = s.recv(400)
-   #regex the color from the json data
-   m = ure.search('"field2":"(#.*)"',data)
-   color = m.group(1)
-   return color
+   r = urequests.get(url)
+   json = r.json()
+   
+   return json['field2']
 
 def hex_to_rgb(value):
     """Return (red, green, blue) for the color given as #rrggbb."""
