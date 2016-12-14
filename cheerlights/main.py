@@ -57,6 +57,9 @@ def hex_to_rgb(value):
 if __name__ == "__main__":
    resetNeoPixel()
    while True:
-      color = getCheerlightsValue()
-      setNeoPixel(color)
+      try:
+         color = getCheerlightsValue()
+         setNeoPixel(color)
+      except:
+	     print('Looks like we had an error on getting our color.')
       time.sleep(30)
