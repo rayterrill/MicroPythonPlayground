@@ -61,5 +61,5 @@ if __name__ == "__main__":
          color = getCheerlightsValue()
          setNeoPixel(color)
       except:
-	     print('Looks like we had an error on getting our color.')
+         print('Looks like we had an error on getting our color.')
       time.sleep(30)
