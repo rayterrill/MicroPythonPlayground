@@ -1,0 +1,5 @@
+put wifi setup, things we want to install into boot.py
+
+blink blue when connecting to wifi
+
+do color loop if connected to wifi

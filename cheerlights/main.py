@@ -2,64 +2,68 @@ import machine, neopixel, time
 import network, socket
 import ure
 import urequests
+import json
+import os
+import sys
 
-#turn on wifi
-sta_if = network.WLAN(network.STA_IF)
-sta_if.active(True)
-sta_if.connect('ENTER_YOUR_SSID','ENTER_YOUR_WIFI_PASSWORD')
-time.sleep(3)
+COLORS = {
+   'red': (0, 255, 0),
+   'green': (255, 0, 0),
+   'blue': (0, 0, 255),
+   'cyan': (255, 0, 255),
+   'white': (255, 255, 255),
+   'oldlace': (145, 153, 130),
+   'purple': (0, 128, 128),
+   'magenta': (0, 255, 51),
+   'yellow': (170, 255, 0),
+   'orange': (34, 255, 0),
+   'pink': (51, 255, 119)
+}
 
-np = neopixel.NeoPixel(machine.Pin(14), 1)
+SLEEP = .1
 
 def setNeoPixel(color):
-   npColor = hex_to_rgb(color)
-   #convert values to gamma values
-   #more info here info here: https://learn.adafruit.com/led-tricks-gamma-correction/the-issue
-   gammaValues = setGammaValues(npColor)
+   val = COLORS[color]
    
-   np[0] = gammaValues
+   np[0] = val
    np.write()
-
-def setGammaValues(npColor):
-   r, g, b = npColor
-
-   r = gammaEncode(r)
-   g = gammaEncode(g)
-   b = gammaEncode(b)
-   
-   gammaValues = (r, g, b)
-   return gammaValues
-
-def gammaEncode(value):
-   gamma = 6
-
-   #http://stackoverflow.com/questions/16521003/gamma-correction-formula-gamma-or-1-gamma
-   gammaVal = ((float(value) / 255) ** gamma) * 255
-   return round(gammaVal)
 
 def resetNeoPixel():
    np[0] = (0, 0, 0)
    np.write()
-   
+
+def circleColors():
+   for key in COLORS:
+      np[0] = COLORS[key]
+      np.write()
+      time.sleep(SLEEP)
+
 def getCheerlightsValue():
-   url = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
+   url = 'http://api.thingspeak.com/channels/1417/field/1/last.json'
    r = urequests.get(url)
    json = r.json()
    
-   return json['field2']
-
-def hex_to_rgb(value):
-    """Return (red, green, blue) for the color given as #rrggbb."""
-    value = value.lstrip('#')
-    lv = len(value)
-    return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+   return json['field1']
 
 if __name__ == "__main__":
+   np = neopixel.NeoPixel(machine.Pin(14), 1)
    resetNeoPixel()
+
+   from captive_portal import CaptivePortal
+
+   portal = CaptivePortal()
+
+   portal.start()
+
+   #loop 3 times to indicate we're connected
+   for i in range(3):
+      circleColors()
+
    while True:
-      try:
-         color = getCheerlightsValue()
-         setNeoPixel(color)
-      except:
-         print('Looks like we had an error on getting our color.')
-      time.sleep(30)
+      while True:
+         try:
+            color = getCheerlightsValue()
+            setNeoPixel(color)
+         except:
+            print('Looks like we had an error on getting our color.')
+         time.sleep(30)
